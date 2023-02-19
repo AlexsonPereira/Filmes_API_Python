@@ -6,18 +6,20 @@ from rest_framework.permissions import IsAuthenticated, IsAuthenticatedOrReadOnl
 from rest_framework_simplejwt.authentication import JWTAuthentication
 from rest_framework.response import Response
 from .models import Movie
-from .serializer import MovieSerializer
+from .serializer import MovieSerializer, MovieOrderSerializer
+from rest_framework.pagination import PageNumberPagination
 
 
 # Create your views here.
-class MoviesView(APIView):
+class MoviesView(APIView, PageNumberPagination):
     authentication_classes = [JWTAuthentication]
     permission_classes = [IsAuthenticatedOrReadOnly]
 
     def get(self, req):
         movies = Movie.objects.all()
-        serializer = MovieSerializer(movies, many=True)
-        return Response(serializer.data, 200)
+        pages = self.paginate_queryset(movies, req)
+        serializer = MovieSerializer(pages, many=True)
+        return self.get_paginated_response(serializer.data)
 
     def post(self, req):
         serializer = MovieSerializer(data=req.data)
@@ -29,9 +31,22 @@ class MoviesView(APIView):
 class MoviesDetailsView(APIView):
     def get(self, req, movie_id):
         movie = get_object_or_404(Movie, id=movie_id)
-        Response(movie)
+        serializer = MovieSerializer(movie)
+        return Response(serializer.data, 200)
 
     def delete(self, req, movie_id):
         movie = get_object_or_404(Movie, id=movie_id)
         movie.delete()
         return Response(status=204)
+
+
+class MoviesOrderView(APIView):
+    authentication_classes = [JWTAuthentication]
+    permission_classes = [IsAuthenticatedOrReadOnly]
+
+    def post(self, req, movie_id):
+        movie_find = get_object_or_404(Movie, id=movie_id)
+        serializer = MovieOrderSerializer(data=req.data)
+        serializer.is_valid(raise_exception=True)
+        serializer.save(movie=movie_find, user=req.user)
+        return Response(serializer.data, 201)
