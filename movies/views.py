@@ -25,7 +25,6 @@ class MoviesView(APIView, PageNumberPagination):
 
     def post(self, req):
         self.check_object_permissions(req, obj=None)
-        ipdb.set_trace()
         serializer = MovieSerializer(data=req.data)
         serializer.is_valid(raise_exception=True)
         serializer.save(user=req.user)

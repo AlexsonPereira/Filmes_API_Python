@@ -8,7 +8,7 @@ class MovieSerializer(serializers.Serializer):
     title = serializers.CharField(max_length=127)
     duration = serializers.CharField(max_length=10, required=False, default=None)
     rating = serializers.ChoiceField(choices=RatingChoices, default=RatingChoices.G)
-    synopsis = serializers.CharField(required=False, default=None)
+    synopsis = serializers.CharField(required=False, allow_null=True)
     added_by = serializers.EmailField(read_only=True, source="user.email")
 
     def create(self, validated_data):

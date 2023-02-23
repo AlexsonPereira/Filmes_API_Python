@@ -18,7 +18,7 @@ class Movie(models.Model):
         choices=RatingChoices.choices,
         default=RatingChoices.G,
     )
-    synopsis = models.TextField(blank=False)
+    synopsis = models.TextField(null=True, default=None)
     user = models.ForeignKey(
         "users.User", on_delete=models.CASCADE, related_name="movies"
     )
