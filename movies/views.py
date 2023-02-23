@@ -8,12 +8,14 @@ from rest_framework.response import Response
 from .models import Movie
 from .serializer import MovieSerializer, MovieOrderSerializer
 from rest_framework.pagination import PageNumberPagination
+from users.permissions import IsAdminAccount
+import ipdb
 
 
 # Create your views here.
 class MoviesView(APIView, PageNumberPagination):
     authentication_classes = [JWTAuthentication]
-    permission_classes = [IsAuthenticatedOrReadOnly]
+    permission_classes = [IsAuthenticatedOrReadOnly, IsAdminAccount]
 
     def get(self, req):
         movies = Movie.objects.all()
@@ -22,6 +24,8 @@ class MoviesView(APIView, PageNumberPagination):
         return self.get_paginated_response(serializer.data)
 
     def post(self, req):
+        self.check_object_permissions(req, obj=None)
+        ipdb.set_trace()
         serializer = MovieSerializer(data=req.data)
         serializer.is_valid(raise_exception=True)
         serializer.save(user=req.user)
@@ -29,12 +33,17 @@ class MoviesView(APIView, PageNumberPagination):
 
 
 class MoviesDetailsView(APIView):
+    authentication_classes = [JWTAuthentication]
+    permission_classes = [IsAuthenticatedOrReadOnly, IsAdminAccount]
+
     def get(self, req, movie_id):
+        self.check_object_permissions(req, obj=None)
         movie = get_object_or_404(Movie, id=movie_id)
         serializer = MovieSerializer(movie)
         return Response(serializer.data, 200)
 
     def delete(self, req, movie_id):
+        self.check_object_permissions(req, obj=None)
         movie = get_object_or_404(Movie, id=movie_id)
         movie.delete()
         return Response(status=204)

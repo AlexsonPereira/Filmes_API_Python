@@ -28,6 +28,7 @@ class UsersDetailsView(APIView):
 
     def get(self, req, user_id):
         user_find = get_object_or_404(User, id=user_id)
+        self.check_object_permissions(req, obj=user_find)
         serializer = UserSerializer(user_find)
         return Response(serializer.data, 200)
 

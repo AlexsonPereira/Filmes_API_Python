@@ -1,14 +1,14 @@
 from rest_framework import serializers
 
-from movies.models import Movie, MovieOrder
+from movies.models import Movie, MovieOrder, RatingChoices
 
 
 class MovieSerializer(serializers.Serializer):
     id = serializers.IntegerField(read_only=True)
     title = serializers.CharField(max_length=127)
-    duration = serializers.CharField(max_length=10)
-    rating = serializers.CharField(max_length=20)
-    synopsis = serializers.CharField()
+    duration = serializers.CharField(max_length=10, required=False, default=None)
+    rating = serializers.ChoiceField(choices=RatingChoices, default=RatingChoices.G)
+    synopsis = serializers.CharField(required=False, default=None)
     added_by = serializers.EmailField(read_only=True, source="user.email")
 
     def create(self, validated_data):
